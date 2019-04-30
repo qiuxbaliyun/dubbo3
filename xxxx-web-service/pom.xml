@@ -1,0 +1,103 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.xxxx.service</groupId>
+	<artifactId>xxxx-web-service</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<parent>
+		<groupId>com.xxxx.service</groupId>
+		<version>1.0-SNAPSHOT</version>
+		<artifactId>xxxx-parent</artifactId>
+		<relativePath>../xxxx-parent</relativePath>
+	</parent>
+	
+    
+
+	<dependencies>
+		<dependency>
+			<groupId>com.xxxx.service</groupId>
+			<artifactId>xxxx-service</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	
+	
+	<profiles>
+	   <profile>
+	       <id>dev</id>
+	       <activation>
+	           <activeByDefault>true</activeByDefault>
+	       </activation>
+	       <properties>
+	           <profiles.active>dev</profiles.active>
+	       </properties>
+	   </profile>
+	    
+	   <profile>
+	      <id>test</id>
+	      <properties>
+	         <profiles.active>test</profiles.active>
+   	      </properties>
+	   </profile>
+	   
+	   <profile>
+	      <id>pro</id>
+	      <properties>
+	         <profiles.active>pro</profiles.active>
+	      </properties>
+	   </profile>
+	</profiles>
+	
+	<!-- 实现开发、测试、生产环境区分运行配置
+	     新建src/main/profile/web.xml  这个web.xml跟webapp/web.xml的区别：
+	     
+		 <context-param>
+		    <param-name>spring.profiles.active</param-name>
+		    <param-value>${profiles.active}</param-value>
+		</context-param>
+	     
+	     运行打包命令
+	     maven build : clean install -DskipTests -P test 
+	     
+	     ${profiles.active}将被替换成test
+	 -->
+	
+	<build>
+	   <finalName>xxxx-web-service</finalName>
+	   
+	   <plugins>
+	         <plugin>
+		         <groupId>org.apache.tomcat.maven</groupId>
+				 <artifactId>tomcat7-maven-plugin</artifactId>
+				 <version>2.2</version>
+	             <configuration>
+	                <path>/${project.build.finalName}</path>
+	                <uriEncoding>UTF-8</uriEncoding>
+	             </configuration>
+	         </plugin>
+	         <plugin>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-war-plugin</artifactId>
+	            <configuration>
+	                <webResources>
+	                    <resources>
+	                       <filtering>true</filtering>
+	                       <directory>src/main/profile</directory>
+	                       <targetPath>WEB-INF</targetPath>
+	                       <includes>
+	                          <include>**/web.xml</include>
+	                       </includes>
+	                    </resources>
+	                </webResources>
+	                <warSourceDirectory>src/main/webapp</warSourceDirectory>
+	                <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+	            </configuration>
+	         </plugin>
+	   </plugins>
+	</build>
+	
+	
+</project>

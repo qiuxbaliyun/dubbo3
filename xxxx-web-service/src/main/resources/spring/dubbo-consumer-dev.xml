@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://code.alibabatech.com/schema/dubbo 
+    http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    
+    <dubbo:application name="xxxx-web-service"/>
+    <dubbo:registry protocol="zookeeper" address="zookeeper://127.0.0.1:2181"/>
+    <!-- 启动时检查 
+        dubbo缺省check会在启动时检查依赖的服务是否可用，不可用是出抛出异常，阻止spring初始化完成，以便在上线时，及早发现问题，默认check="true"
+        dubbo.properties可以直接配置， dubbo.reference.check=false 强制改变所有reference的check值，就算配置中有声明，也会被覆盖    
+    -->
+    <!--集群容错 
+        在集群调用失效时，dubbo提供了多种容错方案，缺省为failover 重试
+        failover cluster:失败自动切换，当出现失败，重试其他服务器 1，通常用于读操作，但重试会带来更长的延迟，可通过retries="2" 来设置重试次数（不含第一次）
+        failfast        :快速失败，只发起一次调用，失败立即报错，通常用于非幂等性的写操作，比如新增记录
+        failsafe        :失败安全，出现异常时，直接忽略，通常用于写入审计日志等操作
+        failback        :失败自动恢复，后台记录失败请求，定时重发，通常用于消息通知等操作
+        forking         :并行调用多个服务器，只要一个成功即返回，通常用于读写较高的读操作，但要浪费更多的服务资源，可通过forks="2"来设置最大并行数
+        broadcost       :广播调用所有提供者，逐个调用，任意一台报错则报错，通常用于通知所有提供者更新缓存或者日志等本地资源信息
+     -->
+     <!-- 负载均衡 缺省为
+         random loadbalance:随机，按权重设置随机概率
+         roundRobin        :轮询
+         leastActive       :最少活跃调用数
+         consistentHash    :一致的hash
+      -->
+    <dubbo:reference interface="com.xxxx.repo.IEnterpriseService" id="enterpriseService" timeout="1000" check="true" cluster="failover" retries="2" loadbalance="random"/>
+    <dubbo:reference interface="com.xxxx.repo.IProductService" id="productService" timeout="1000" check="true" cluster="failover" retries="2" loadbalance="random"/>
+
+    <!-- 配置直连 -->
+    <!-- 在开发及测试环境下，只测试指定服务提供者，这时候需要点对点的直连，
+         点对点直联方式，将以服务接口为单位，忽略注册中心的提供者列表。
+         如果是线上需求需要点对点，可在<dubbo:reference>中配置url指向提供者，多个地址用分号隔开，配置如下   2881:在xxxx-service中dubbo.properties下的dubbo.protocol.port值
+         <dubbo:reference interface="com.xxxx.repo.IProductService" id="productService" timeout="1000" check="false" url="dubbo://localhost:20881"/>
+          -->
+</beans>

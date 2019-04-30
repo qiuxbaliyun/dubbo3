@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+  http://www.springframework.org/schema/aop 
+  http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+  
+  <context:annotation-config/>
+  
+  <!-- proxy-target-class默认为false,改为“true”使用CGLib动态代理 -->
+  <aop:aspectj-autoproxy proxy-target-class="true"/>
+  <!-- 自动扫描该包，使SpringMvc认为包下用了@controller注解的类是控制器-->
+  <context:component-scan base-package="com.xxxx.restservice" />
+  
+  <import resource="classpath:spring/dubbo-consumer-${spring.profiles.active}.xml"/>
+  <import resource="classpath:spring/dubbo-provider.xml"/>
+  
+</beans>
+
