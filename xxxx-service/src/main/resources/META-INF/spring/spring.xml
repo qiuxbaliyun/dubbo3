@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+  http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+  http://www.springframework.org/schema/aop 
+  http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+  <!-- 自动扫描 -->
+  <context:component-scan base-package="com.xxxx"></context:component-scan>
+  
+  	<!-- property文件配置 可在配置中用${...}代替配置文件中的内容 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+	   	<property name="driverClass" value="${jdbc.driver}"/>
+	   	<property name="user" value="${jdbc.username}"/>
+	   	<property name="password" value="${jdbc.password}"/>
+	   	<property name="jdbcUrl" value="${jdbc.url}"/>
+	   	<property name="maxPoolSize" value="100"/>
+	   	<property name="minPoolSize" value="10"/>
+	   	<property name="initialPoolSize" value="10"/>
+	   	<property name="maxIdleTime" value="120"/>
+	   	<property name="checkoutTimeout" value="10000"/>
+	   	<property name="acquireIncrement" value="2"/>
+	   	<property name="acquireRetryAttempts" value="0"/>
+	   	<property name="acquireRetryDelay" value="1000"/>
+	</bean>
+	
+	<!-- spring和mybatis完美整合，不需要mybatis的配置映射文件 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	      <property name="dataSource" ref="dataSource" />
+	      <property name="mapperLocations" value="classpath:com/xxxx/mybatis/mapping/*.xml">
+	      </property>
+	</bean>
+	
+	<!-- dao接口所在包名，spring会自动查找其下的类-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage"
+			value="com.xxxx.mybatis.IDao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 事务管理 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"></property>
+    </bean>
+</beans>
